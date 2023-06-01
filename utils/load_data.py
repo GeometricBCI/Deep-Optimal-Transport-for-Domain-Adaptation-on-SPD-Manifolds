@@ -1,6 +1,6 @@
 '''
 ############################################################################################################################
-Author     : Ce Ju, Nanyang Technological University. 
+Author     : Ce Ju
 Date       : 1st, Sep., 2022
 --------------------------------------------------------------------------------------------------------------------------
 Discription: The two data loader classes are for Korea University dataset and the BCIC-IV-2a dataset. Each loader will
@@ -19,7 +19,6 @@ from scipy.signal import cheb2ord
 from scipy.linalg import eigvalsh
 import torch as th
 
-#import pyriemann
 from pyriemann.estimation import Covariances, Shrinkage
 
 from moabb.datasets import BNCI2015001
