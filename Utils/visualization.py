@@ -1,20 +1,5 @@
 '''
 #####################################################################################################################
-Date        : 1st, Jun., 2023
----------------------------------------------------------------------------------------------------------------------
-Descriptions:  This is the part of the code for visualization, where you can observe the source-target distribution 
-and the distribution of the source after it has been moved through optimal transport. This part of the code was also 
-modified from the source code of SPDSW.
-
-The source code for SPDSW can be found in the following link:
-
-https://github.com/clbonet/SPDSW
-
-#######################################################################################################################
-'''
-
-'''
-#####################################################################################################################
 Author      : Ce Ju, Nanyang Technological University. 
 Date        : 1st, Jun., 2023
 ---------------------------------------------------------------------------------------------------------------------
@@ -138,17 +123,17 @@ for i in range(len(vect_B1)):
     tab_proj_1.append(Line(mat2point(geod_le_1.numpy())).color('blue').lw(0.8))
 
 
-s_0        = Spheres(vect_B0, r=.1).c("red")
-wsw_0      = Spheres(vect_Wt_B0_W, r=.1).c("blue")
-s_1        = Spheres(vect_B1, r=.1).c("red")
-wsw_1      = Spheres(vect_Wt_B1_W, r=.1).c("blue")
+s_0   = Spheres(vect_B0, r=.1).c("red")
+wsw_0 = Spheres(vect_Wt_B0_W, r=.1).c("blue")
+s_1   = Spheres(vect_B1, r=.1).c("red")
+wsw_1 = Spheres(vect_Wt_B1_W, r=.1).c("blue")
 
 
-plt        = Plotter(N=2, bg='white', axes=0)
+plt   = Plotter(N=2, bg='white', axes=0)
 
 
-vp = plt.at(0).show(cone_mesh1,cone_mesh2, s_0, wsw_0, "Source-Target", zoom=1.2, interactive=0)
-vp = plt.at(1).show(cone_mesh1,cone_mesh2, tab_proj_1, s_1, wsw_1, "Source - Source (OT)", zoom=1.2, interactive=1)
+vp    = plt.at(0).show(cone_mesh1,cone_mesh2, s_0, wsw_0, "Source-Target", zoom=1.2, interactive=0)
+vp    = plt.at(1).show(cone_mesh1,cone_mesh2, tab_proj_1, s_1, wsw_1, "Source - Source (OT)", zoom=1.2, interactive=1)
 vp.screenshot('Source_OT.png')
 
 
