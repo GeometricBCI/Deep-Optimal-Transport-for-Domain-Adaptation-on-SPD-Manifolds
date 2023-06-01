@@ -3,4 +3,4 @@ mne
 pyriemann 
 geoopt
 pot
-
+moabb==0.4.5
