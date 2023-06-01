@@ -13,6 +13,21 @@ https://github.com/clbonet/SPDSW
 #######################################################################################################################
 '''
 
+'''
+#####################################################################################################################
+Author      : Ce Ju, Nanyang Technological University. 
+Date        : 1st, Jun., 2023
+---------------------------------------------------------------------------------------------------------------------
+Descriptions:  This is the part of the code for visualization, where you can observe the source-target distribution 
+and the distribution of the source after it has been moved through optimal transport.
+
+The source code for SPDSW can be found in the following link:
+
+https://github.com/clbonet/SPDSW
+
+#######################################################################################################################
+'''
+
 
 from vedo import *
 import ot
@@ -23,13 +38,13 @@ import matplotlib.pyplot as plt
 from tqdm.auto import trange
 from geoopt import linalg
 from pyriemann.datasets import sample_gaussian_spd, generate_random_spd_matrix
-from EMD_OT import EMD
+from EMD_OT import EMD_SPD
 
 
 import torch as th
 import torch.nn.functional as F
 import torch.distributions as D
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if th.cuda.is_available() else "cpu"
 
 
 def busemann_spd(logM, diagA):
@@ -63,18 +78,18 @@ n_samples = 50
 
 W       = th.tensor([[[1, 0.5],[0.5, 1]]], dtype=th.float64)
 B0      = th.tensor(sample_gaussian_spd(n_matrices=n_samples, mean=mean0, sigma=sigma0), device=device)
-Wt_BO_W = th.matmul(th.matmul(th.transpose(W, 2, 1), B0), W)
+Wt_B0_W = th.matmul(th.matmul(th.transpose(W, 2, 1), B0), W)
 vect_B0 = mat2point(B0.numpy())
 vect_Wt_B0_W = mat2point(Wt_B0_W.numpy())
 
 
 theta_0 = np.random.normal(size=(1, 2))
-theta_0 = F.normalize(torch.from_numpy(theta_0), p=2, dim=-1).to(device)
+theta_0 = F.normalize(th.from_numpy(theta_0), p=2, dim=-1).to(device)
 proj_B0, buseman_coord_0 = proj_geod(theta_0, B0)
 
 
 B1           = B0
-Wt_B1_W      = EMD(B0, Wt_B0_W, metric="le")
+Wt_B1_W      = EMD_SPD(B0, Wt_B0_W, metric="le")
 vect_B1      = mat2point(B1.numpy())
 vect_Wt_B1_W = mat2point(Wt_B1_W.numpy())
 
@@ -135,5 +150,8 @@ plt        = Plotter(N=2, bg='white', axes=0)
 vp = plt.at(0).show(cone_mesh1,cone_mesh2, s_0, wsw_0, "Source-Target", zoom=1.2, interactive=0)
 vp = plt.at(1).show(cone_mesh1,cone_mesh2, tab_proj_1, s_1, wsw_1, "Source - Source (OT)", zoom=1.2, interactive=1)
 vp.screenshot('Source_OT.png')
+
+
+
 
 
