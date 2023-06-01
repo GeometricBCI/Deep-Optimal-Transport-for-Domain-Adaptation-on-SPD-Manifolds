@@ -1,0 +1,6 @@
+pymanopt==0.2.5
+mne 
+pyriemann 
+geoopt
+pot
+
