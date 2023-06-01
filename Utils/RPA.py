@@ -181,9 +181,6 @@ def transform_rct2str(source, target_train, target_test, pcoeff=False):
     else:
         return source_pow , target_pow_train, target_pow_test
 
-
-from utils_innovation import manopt as manifoptim
-
 def transform_rct2rot(source, source_label, target_train, target_train_label, target_test, target_test_label, weights=None, distance='euc'):
 
     source_rot = source
