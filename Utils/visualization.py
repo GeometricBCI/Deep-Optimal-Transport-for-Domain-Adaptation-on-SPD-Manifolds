@@ -1,6 +1,5 @@
 '''
 #####################################################################################################################
-Author      : Ce Ju, Nanyang Technological University. 
 Date        : 1st, Jun., 2023
 ---------------------------------------------------------------------------------------------------------------------
 Descriptions:  This is the part of the code for visualization, where you can observe the source-target distribution 
