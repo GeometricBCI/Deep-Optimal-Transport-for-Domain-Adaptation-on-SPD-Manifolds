@@ -1,6 +1,6 @@
 '''
 ############################################################################################################################
-Author     : Ce Ju
+Author     : Ce Ju, Nanyang Technological University. 
 Date       : 1st, Sep., 2022
 --------------------------------------------------------------------------------------------------------------------------
 Discription: The two data loader classes are for Korea University dataset and the BCIC-IV-2a dataset. Each loader will
@@ -25,6 +25,7 @@ from pyriemann.estimation import Covariances
 '''
 This Class FilterBank is from https://github.com/ravikiran-mane/FBCNet
 '''
+
 class FilterBank:
     def __init__(self, fs, pass_width=4, f_width=4):
         self.fs           = fs
@@ -54,7 +55,6 @@ class FilterBank:
 
         if window_details:
             n_samples = int(self.fs * (window_details.get('tmax') - window_details.get('tmin')))
-            #+1
 
         filtered_data = np.zeros((len(self.filter_coeff),n_trials,n_channels,n_samples))
 
@@ -239,9 +239,12 @@ class load_KU:
 
         return stack_tensor
 
-    def _riemann_distance(self, A, B):
-        #AIRM 
-        return np.sqrt((np.log(eigvalsh(A, B))**2).sum())
+    def _riemann_distance(self, A, B, metric = 'LEM'):
+        if metric == 'LEM':
+            return linalg.norm(logm(A) - logm(B), ord='fro')
+        elif metric == 'AIRM':
+            return np.sqrt((np.log(eigvalsh(A, B))**2).sum())
+
 
     def LGT_graph_matrix_fn(self, gamma = 50, time_step = [2, 2, 2, 5], freq_step = [1, 1, 4, 3]):
 
@@ -263,28 +266,6 @@ class load_KU:
                         A[start_point + i, start_point + j] = np.exp(-self._riemann_distance(self.lattice[start_point + i], self.lattice[start_point + j])**2/gamma)
                         A[start_point + j, start_point + i] = A[start_point + i, start_point + j]
             start_point += self.block_dims[m]
-
-          D = np.linalg.inv(np.diag(np.sqrt(np.sum(A, axis = 0))))
-
-          return np.matmul(D, A), A
-
-    def GGT_graph_matrix_fn(self, k = 12, gamma = 50):
-
-          #time_step: a list, step of diffusion to right direction.
-          #freq_step: a list, step of diffusion to down direction.
-          #gamma: Gaussian coefficent.
-        
-          A = np.zeros((sum(self.block_dims), sum(self.block_dims))) 
-
-          for m in range(sum(self.block_dims)):
-              row_record = []
-              for n in range(sum(self.block_dims)):
-                row_record.append(np.exp(-self._riemann_distance(self.lattice[m], self.lattice[n])**2/gamma))
-              k_index = sorted(range(len(row_record)), key=lambda i: row_record[i])[-k:]
-              for index in k_index:
-                A[m, index] = row_record[index]
-
-          A = (np.abs(A.T - A) + A.T + A)/2
 
           D = np.linalg.inv(np.diag(np.sqrt(np.sum(A, axis = 0))))
 
@@ -363,7 +344,7 @@ def get_data(subject,training,PATH):
     return data_return, class_return-1 
 
 
-class load_BCIC:
+class load_BNCI2014001:
     def __init__(self, sub, TorE = True, alg_name ='Tensor_CSPNet', session_no = 1, scenario = 'CV'):
 
         #self.channel_index = [7, 8, 9, 10, 12, 13, 14, 17, 18, 19, 20, 32, 33, 34, 35, 36, 37, 38, 39, 40]
@@ -445,7 +426,6 @@ class load_BCIC:
                 temporal_seg.append(np.expand_dims(x_fb[:, :, :, a:b], axis = 1))
             temporal_seg   = np.concatenate(temporal_seg, axis = 1)
 
-
             stack_tensor   = []
             for i in range(temporal_seg.shape[0]):
                 cov_stack  = []
@@ -471,9 +451,11 @@ class load_BCIC:
 
         return stack_tensor
 
-    def _riemann_distance(self, A, B):
-        #AIRM 
-        return np.sqrt((np.log(eigvalsh(A, B))**2).sum())
+    def _riemann_distance(self, A, B, metric = 'LEM'):
+        if metric == 'LEM':
+            return linalg.norm(logm(A) - logm(B), ord='fro')
+        elif metric == 'AIRM':
+            return np.sqrt((np.log(eigvalsh(A, B))**2).sum())
 
     def LGT_graph_matrix_fn(self, gamma = 50, time_step = [2, 2, 2, 4], freq_step = [1, 1, 4, 3]):
 
@@ -500,23 +482,186 @@ class load_BCIC:
 
           return np.matmul(D, A), A
 
-    def GGT_graph_matrix_fn(self, k = 12, gamma =50):
+
+    def generate_training_test_set_CV(self, kf_iter):
+
+        train_idx = self.train_indices[kf_iter]
+        test_idx  = self.test_indices[kf_iter]
+
+        if self.alg_name == 'Graph_CSPNet':
+            self.lattice = np.mean(self.x_stack[train_idx], axis = 0)
+
+        return self.x_stack[train_idx], self.x_stack[test_idx], self.y_labels[train_idx], self.y_labels[test_idx]
+
+
+    def generate_training_valid_test_set_Holdout(self):
+
+        if self.alg_name == 'Graph_CSPNet':
+            self.lattice = np.mean(self.x_train_stack, axis = 0)
+
+        return self.x_train_stack, self.x_test_stack, self.y_labels_1, self.y_labels_2
+
+
+
+class load_BNCI2015001:
+    def __init__(self, sub, alg_name ='Tensor_CSPNet', session_no = 1, scenario = 'CV'):
+
+        #self.channel_index = [7, 8, 9, 10, 12, 13, 14, 17, 18, 19, 20, 32, 33, 34, 35, 36, 37, 38, 39, 40]
+        self.alg_name = alg_name
+        self.scenario = scenario
+        self.sub      = sub
+        
+        self.paradigm = MotorImagery(events=['right_hand', 'feet'])
+        self.paradigm_name = 'MI'
+        self.dataset = BNCI2015001()
+
+
+        if self.alg_name == 'Tensor_CSPNet':
+            #For Tensor-CSPNet
+            self.freq_seg = 4
+            self.time_seg = [[0, 512], [512, 512*2], [512*2, 512*3], [512*3, 512*4], [512*4, 512*5]]
+
+        elif self.alg_name == 'Graph_CSPNet':
+            #For Graph-CSPNet
+            self.freq_seg  = 4
+            self.time_freq_graph = interval = {
+            '1':[[0, 512], [512, 1024], [1024, 1536], [1536, 2048], [2048, 2560]],
+            '2':[[0, 512], [512, 1024], [1024, 1536], [1536, 2048], [2048, 2560]],
+            '3':[[0, 512], [512, 1024], [1024, 1536], [1536, 2048], [2048, 2560]],
+            '4':[[0, 512], [512, 1024], [1024, 1536], [1536, 2048], [2048, 2560]],
+            '5':[[0, 512], [512, 1024], [1024, 1536], [1536, 2048], [2048, 2560]],
+            '6':[[0, 512], [512, 1024], [1024, 1536], [1536, 2048], [2048, 2560]],
+            '7':[[0, 256], [256, 512], [512, 768], [768, 1024],[1024, 1280], [1280,1536],
+                 [1536, 1792], [1792, 2048], [2048, 2304], [2304, 2560]],
+            '8':[[0, 256], [256, 512], [512, 768], [768, 1024],[1024, 1280], [1280,1536],
+                 [1536, 1792], [1792, 2048], [2048, 2304], [2304, 2560]],
+            '9':[[0, 256], [256, 512], [512, 768], [768, 1024],[1024, 1280], [1280,1536],
+                 [1536, 1792], [1792, 2048], [2048, 2304], [2304, 2560]]
+            }
+            self.block_dims = [
+                          len(self.time_freq_graph['1']), 
+                          len(self.time_freq_graph['2']), 
+                          len(self.time_freq_graph['3']) + len(self.time_freq_graph['4']) + len(self.time_freq_graph['5']) + len(self.time_freq_graph['6']), 
+                          len(self.time_freq_graph['7']) + len(self.time_freq_graph['8']) + len(self.time_freq_graph['9'])
+                          ]
+            self.time_windows = [5, 5, 5, 10]
+
+        if scenario == 'CV':
+
+            x, labels, _ = self.paradigm.get_data(self.dataset, subjects=[self.sub])
+
+            if session_no == 1:
+                self.x = x[:200] 
+                self.labels = self._text2number(labels[:200])
+            else session_no == 2:
+                self.x = x[200:400]
+                self.labels = self._text2number(labels[200:400])
+
+            fbank     = FilterBank(fs = 512, pass_width = self.freq_seg)
+            _         = fbank.get_filter_coeff()
+
+            '''The shape of x_fb is No. of (trials, frequency bands, channels, timestamps)'''
+            x_fb         = fbank.filter_data(self.x, window_details={'tmin':0.0, 'tmax':5.0}).transpose(1, 0, 2, 3)
+            self.x_stack = self._tensor_stack(x_fb)
+            
+            self.train_indices = np.load('index/BCIC_index/sess'+str(session_no)+'_sub'+str(sub)+'_train_index.npy', allow_pickle=True)
+            self.test_indices  = np.load('index/BCIC_index/sess'+str(session_no)+'_sub'+str(sub)+'_test_index.npy', allow_pickle=True)
+
+        elif scenario == 'Holdout':
+
+            self.x, self.labels, _ = self.paradigm.get_data(self.dataset, subjects=[self.sub])
+
+            fbank    = FilterBank(fs = 512, pass_width = self.freq_seg)
+            _        = fbank.get_filter_coeff()
+
+            x_train_fb = fbank.filter_data(self.x[:200], window_details={'tmin':0.0, 'tmax':5.0}).transpose(1, 0, 2, 3)
+            x_test_fb  = fbank.filter_data(self.x[200:400], window_details={'tmin':0.0, 'tmax':5.0}).transpose(1, 0, 2, 3)
+
+            self.x_train_stack = self._tensor_stack(x_train_fb)
+            self.x_test_stack  = self._tensor_stack(x_test_fb)
+
+
+    def _text2number(self, labels):
+
+        y = []
+        for label in labels:
+            if label == 'right_hand':
+                y.append(0.0)
+        else:
+            y.append(1.0)
+        
+        return np.array(y)
+
+
+    def _tensor_stack(self, x_fb):
+
+        if self.alg_name == 'Tensor_CSPNet':
+            '''
+            For Tensor-CSPNet:
+
+            Step 1: Segment the signal on each given time intervals.
+                    e.g., (trials, frequency bands, channels, timestamps) ---> 
+                    (trials, temporal segments, frequency bands, channels, timestamps);
+            Step 2: Take covariance.
+                    e.g., (trials, temporal segments, frequency bands, channels, timestamps) --->
+                    (trials, temporal segments, frequency bands, channels, channels).
+            '''
+            temporal_seg   = []
+            for [a, b] in self.time_seg:
+                temporal_seg.append(np.expand_dims(x_fb[:, :, :, a:b], axis = 1))
+            temporal_seg   = np.concatenate(temporal_seg, axis = 1)
+
+            stack_tensor   = []
+            for i in range(temporal_seg.shape[0]):
+                cov_stack  = []
+                for j in range(temporal_seg.shape[1]):
+                    cov_stack.append(Covariances().transform(temporal_seg[i, j]))
+                stack_tensor.append(np.stack(cov_stack, axis = 0))
+            stack_tensor   = np.stack(stack_tensor, axis = 0)
+
+        elif self.alg_name == 'Graph_CSPNet':
+            '''
+            For Graph-CSPNet:
+            Take covariance on each temporal intervals given in the time-frequency graph. 
+
+            '''
+            stack_tensor   = []
+            for i in range(1, x_fb.shape[1]+1):
+              for [a, b] in self.time_freq_graph[str(i)]:
+                cov_record = []
+                for j in range(x_fb.shape[0]):
+                  cov_record.append(Covariances().transform(x_fb[j, i-1:i, :, a:b]))
+                stack_tensor.append(np.expand_dims(np.concatenate(cov_record, axis = 0), axis = 1))
+            stack_tensor   = np.concatenate(stack_tensor, axis = 1)
+
+        return stack_tensor
+
+    def _riemann_distance(self, A, B, metric = 'LEM'):
+        if metric == 'LEM':
+            return linalg.norm(logm(A) - logm(B), ord='fro')
+        elif metric == 'AIRM':
+            return np.sqrt((np.log(eigvalsh(A, B))**2).sum())
+
+    def LGT_graph_matrix_fn(self, gamma = 50, time_step = [2, 2, 2, 4], freq_step = [1, 1, 4, 3]):
 
           #time_step: a list, step of diffusion to right direction.
           #freq_step: a list, step of diffusion to down direction.
           #gamma: Gaussian coefficent.
         
-          A = np.zeros((sum(self.block_dims), sum(self.block_dims))) 
-
-          for m in range(sum(self.block_dims)):
-              row_record = []
-              for n in range(sum(self.block_dims)):
-                row_record.append(np.exp(-self._riemann_distance(self.lattice[m], self.lattice[n])**2/gamma))
-              k_index = sorted(range(len(row_record)), key=lambda i: row_record[i])[-k:]
-              for index in k_index:
-                A[m, index] = row_record[index]
-
-          A = (np.abs(A.T - A) + A.T + A)/2
+          A = np.zeros((sum(self.block_dims), sum(self.block_dims))) + np.eye(sum(self.block_dims))
+          start_point = 0
+          for m in range(len(self.block_dims)):
+            for i in range(self.block_dims[m]):
+              max_time_step = min(self.time_windows[m] - 1 - (i % self.time_windows[m]), time_step[m])
+              for j in range(i + 1, i + max_time_step + 1):
+                  A[start_point + i, start_point + j] = np.exp(-self._riemann_distance(self.lattice[start_point + i], self.lattice[start_point + j])**2/gamma)
+                  A[start_point + j, start_point + i] = A[start_point + i, start_point + j]
+              for freq_mul in range(1, freq_step[m]+1):
+                for j in range(i+ freq_mul*self.time_windows[m], i + freq_mul*self.time_windows[m] + max_time_step + 1):
+                    if j < self.block_dims[m]: 
+                        A[start_point + i, start_point + j] = np.exp(-self._riemann_distance(self.lattice[start_point + i], self.lattice[start_point + j])**2/gamma)
+                        A[start_point + j, start_point + i] = A[start_point + i, start_point + j]
+            start_point += self.block_dims[m]
 
           D = np.linalg.inv(np.diag(np.sqrt(np.sum(A, axis = 0))))
 
@@ -540,6 +685,10 @@ class load_BCIC:
             self.lattice = np.mean(self.x_train_stack, axis = 0)
 
         return self.x_train_stack, self.x_test_stack, self.y_labels_1, self.y_labels_2
+
+
+
+
 
 
 
