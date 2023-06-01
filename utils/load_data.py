@@ -20,7 +20,10 @@ from scipy.linalg import eigvalsh
 import torch as th
 
 #import pyriemann
-from pyriemann.estimation import Covariances
+from pyriemann.estimation import Covariances, Shrinkage
+
+from moabb.datasets import BNCI2015001
+from moabb.paradigms import MotorImagery
 
 '''
 This Class FilterBank is from https://github.com/ravikiran-mane/FBCNet
@@ -218,7 +221,7 @@ class load_KU:
             for i in range(temporal_seg.shape[0]):
                 cov_stack = []
                 for j in range(temporal_seg.shape[1]):
-                    cov_stack.append(Covariances().transform(temporal_seg[i, j]))
+                    cov_stack.append(Shrinkage(1e-2).transform(Covariances().transform(temporal_seg[i, j])))
                 stack_tensor.append(np.stack(cov_stack, axis = 0))
             stack_tensor = np.stack(stack_tensor, axis = 0)
 
@@ -233,7 +236,7 @@ class load_KU:
               for [a, b] in self.time_freq_graph[str(i)]:
                 cov_record = []
                 for j in range(x_fb.shape[0]):
-                  cov_record.append(Covariances().transform(x_fb[j, i-1:i, :, a:b]))
+                  cov_record.append(Shrinkage(1e-2).transform(Covariances().transform(x_fb[j, i-1:i, :, a:b])))
                 stack_tensor.append(np.expand_dims(np.concatenate(cov_record, axis = 0), axis = 1))
             stack_tensor = np.concatenate(stack_tensor, axis = 1)
 
@@ -430,7 +433,7 @@ class load_BNCI2014001:
             for i in range(temporal_seg.shape[0]):
                 cov_stack  = []
                 for j in range(temporal_seg.shape[1]):
-                    cov_stack.append(Covariances().transform(temporal_seg[i, j]))
+                    cov_stack.append(Shrinkage(1e-2).transform(Covariances().transform(temporal_seg[i, j])))
                 stack_tensor.append(np.stack(cov_stack, axis = 0))
             stack_tensor   = np.stack(stack_tensor, axis = 0)
 
@@ -445,7 +448,7 @@ class load_BNCI2014001:
               for [a, b] in self.time_freq_graph[str(i)]:
                 cov_record = []
                 for j in range(x_fb.shape[0]):
-                  cov_record.append(Covariances().transform(x_fb[j, i-1:i, :, a:b]))
+                  cov_record.append(Shrinkage(1e-2).transform(Covariances().transform(x_fb[j, i-1:i, :, a:b])))
                 stack_tensor.append(np.expand_dims(np.concatenate(cov_record, axis = 0), axis = 1))
             stack_tensor   = np.concatenate(stack_tensor, axis = 1)
 
@@ -537,7 +540,7 @@ class load_BNCI2015001:
                  [1536, 1792], [1792, 2048], [2048, 2304], [2304, 2560]],
             '9':[[0, 256], [256, 512], [512, 768], [768, 1024],[1024, 1280], [1280,1536],
                  [1536, 1792], [1792, 2048], [2048, 2304], [2304, 2560]]
-            }
+    }
             self.block_dims = [
                           len(self.time_freq_graph['1']), 
                           len(self.time_freq_graph['2']), 
@@ -615,7 +618,7 @@ class load_BNCI2015001:
             for i in range(temporal_seg.shape[0]):
                 cov_stack  = []
                 for j in range(temporal_seg.shape[1]):
-                    cov_stack.append(Covariances().transform(temporal_seg[i, j]))
+                    cov_stack.append(Shrinkage(1e-2).transform(Covariances().transform(temporal_seg[i, j])))
                 stack_tensor.append(np.stack(cov_stack, axis = 0))
             stack_tensor   = np.stack(stack_tensor, axis = 0)
 
@@ -630,7 +633,7 @@ class load_BNCI2015001:
               for [a, b] in self.time_freq_graph[str(i)]:
                 cov_record = []
                 for j in range(x_fb.shape[0]):
-                  cov_record.append(Covariances().transform(x_fb[j, i-1:i, :, a:b]))
+                  cov_record.append(Shrinkage(1e-2).transform(Covariances().transform(x_fb[j, i-1:i, :, a:b])))
                 stack_tensor.append(np.expand_dims(np.concatenate(cov_record, axis = 0), axis = 1))
             stack_tensor   = np.concatenate(stack_tensor, axis = 1)
 
