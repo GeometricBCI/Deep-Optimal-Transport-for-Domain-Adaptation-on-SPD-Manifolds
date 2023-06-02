@@ -10,7 +10,7 @@ This work aims to establish a framework based on optimal transport on the SPD ma
 ![Illustration of Deep Optimal Transport](DOT.png)
 
 
-## Usages
+### Usages
 
 The DOT.py contained in the utils directory represents the principal contribution of this research, encompassing methodologies addressing discrepancies in marginal distribution and conditional distribution, as well as the DJDOT approach. Other baselines, along with the touched upon visualization results, can respectively be found within EMD_OT.py, RPA.py, and visualization.py files.
 
