@@ -24,6 +24,7 @@ We extend our gratitude to the open-source community, which facilitates the wide
 
 
 
+
 ### Data Availability
 
 All of this data can be accessed through the [**MOABB**] package (https://github.com/NeuroTechX/moabb). This package includes a benchmark dataset for advanced decoding algorithms, which comprises 12 open-access datasets and covers over 250 subjects.
