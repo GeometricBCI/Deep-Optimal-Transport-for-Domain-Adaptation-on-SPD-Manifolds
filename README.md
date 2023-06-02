@@ -20,7 +20,7 @@ The DOT.py contained in the utils directory represents the principal contributio
 We extend our gratitude to the open-source community, which facilitates the wider dissemination of the work of other researchers as well as our own. The coding style in this repo is relatively rough. We welcome anyone to refactor it to make it more effective. The repositories related to our work are enumerated below:
 [<img src="https://img.shields.io/badge/GitHub-Geometric BCI Classifier-b31b1b"></img>](https://github.com/GeometricBCI/Tensor-CSPNet-and-Graph-CSPNet)
 [<img src="https://img.shields.io/badge/GitHub-Riemannian Procrustes Analysis-b31b1b"></img>](https://github.com/plcrodrigues/RPA)
-[<img src="https://img.shields.io/badge/GitHub-Sliced-Wasserstein-b31b1b"></img>](https://github.com/clbonet/SPDSW)
+[<img src="https://img.shields.io/badge/GitHub-Sliced Wasserstein-b31b1b"></img>](https://github.com/clbonet/SPDSW)
 
 
 
