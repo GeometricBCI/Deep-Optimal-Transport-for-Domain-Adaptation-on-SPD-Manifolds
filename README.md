@@ -21,7 +21,7 @@ We extend our gratitude to the open-source community, which facilitates the wide
 [<img src="https://img.shields.io/badge/GitHub-Geometric BCI Classifier-b31b1b"></img>](https://github.com/GeometricBCI/Tensor-CSPNet-and-Graph-CSPNet)
 [<img src="https://img.shields.io/badge/GitHub-Riemannian Procrustes Analysis-b31b1b"></img>](https://github.com/plcrodrigues/RPA)
 [<img src="https://img.shields.io/badge/GitHub-Sliced Wasserstein-b31b1b"></img>](https://github.com/clbonet/SPDSW)
-
+[<img src="https://img.shields.io/badge/GitHub-pyRiemann-b31b1b"></img>](https://github.com/pyRiemann/pyRiemann)
 
 
 
