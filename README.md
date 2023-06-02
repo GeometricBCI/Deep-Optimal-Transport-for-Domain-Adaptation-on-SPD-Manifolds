@@ -9,11 +9,9 @@ This work aims to establish a framework based on optimal transport on the SPD ma
 
 ![Illustration of Deep Optimal Transport](DOT.png)
 
-
 ### Usages
 
-The DOT.py contained in the utils directory represents the principal contribution of this research, encompassing methodologies addressing discrepancies in marginal distribution and conditional distribution, as well as the DJDOT approach. Other baselines, along with the touched upon visualization results, can respectively be found within EMD_OT.py, RPA.py, and visualization.py files.
-
+The DOT.py contained in the utils directory represents the principal contribution of this research, encompassing methodologies addressing discrepancies in marginal distribution and conditional distribution, as well as the DJDOT approach. Other baselines, along with the touched upon visualization results, can respectively be found within EMD_OT.py, RPA.py, and visualization.py files. Additionally, DOT_KU.py serves as an experimental script, applying the DOT method to the KU dataset. The hyperparameters may not necessarily be optimal, and should therefore be tailored to suit varying BCI tasks.
 
 ### Related Repositories
 
@@ -22,13 +20,12 @@ We extend our gratitude to the open-source community, which facilitates the wide
 [<img src="https://img.shields.io/badge/GitHub-Riemannian Procrustes Analysis-b31b1b"></img>](https://github.com/plcrodrigues/RPA)
 [<img src="https://img.shields.io/badge/GitHub-Sliced Wasserstein-b31b1b"></img>](https://github.com/clbonet/SPDSW)
 [<img src="https://img.shields.io/badge/GitHub-pyRiemann-b31b1b"></img>](https://github.com/pyRiemann/pyRiemann)
-
-
+[<img src="https://img.shields.io/badge/GitHub-JDOT-b31b1b"></img>](https://github.com/rflamary/JDOT)
+[<img src="https://img.shields.io/badge/GitHub-DeepJDOT-b31b1b"></img>](https://github.com/bbdamodaran/deepJDOT)
 
 ### Data Availability
 
 All of this data can be accessed through the [**MOABB**] package (https://github.com/NeuroTechX/moabb). This package includes a benchmark dataset for advanced decoding algorithms, which comprises 12 open-access datasets and covers over 250 subjects.
-
 
 ### License and Attribution
 
